@@ -12,17 +12,15 @@ library(factoextra)
 
 
 # IMPORT DATA
-DATI <- read.csv("FINAL3.csv", sep=";", dec=",")
+DATI <- read.csv("FINAL3.csv", sep = ";", dec = ",")
 #DATI<-DATI[,1:154]
 rownames(DATI) <- DATI[,1]
 
 summary(DATI)
 #DATI[,154]<-as.numeric(DATI[,154])
 
-df<-df[,2:47]
-final<-as.matrix(df[,2:47])
 final<-as.matrix(DATI[,2:47])
-final[is.na(final)] <- 0
+
 #final<-as.numeric(final)
 
 for (i in 1:dim(final)[1]) {
