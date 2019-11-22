@@ -12,27 +12,32 @@ source("functionheatmap.R") #I took it from https://github.com/shanealynn/Kohone
 
 
 # IMPORT DATA
-DATI <- read.csv("FINAL3.csv", sep = ";", dec = ",")
-DATI <- read.csv("otherindicator.csv", sep = ";", dec = ",")
+DATI <- read.csv("FINAL_4.csv", sep = ";", dec = ",")
+DATI2 <- read.csv("otherindicators.csv", sep = ",", dec = ".")
 
+DATI2$CO2pc<-as.numeric(DATI2$CO2pc)
 #DATI<-DATI[,1:154]
 rownames(DATI) <- DATI[,1]
-
+rownames(DATI2) <- DATI2[,1]
 summary(DATI)
 #DATI[,154]<-as.numeric(DATI[,154])
 
 final<-as.matrix(DATI[,2:47])
 
+
+sum(is.na(final))
 #final<-as.numeric(final)
 
-for (i in 1:dim(final)[1]) {
-  for (j in 1:dim(final)[2]) {
+for (i in 1:123) {
+  for (j in 1:45) {
     
-    ifelse(final[i,45]==0,0,final[i,j]<-final[i,j]/final[i,45]) 
+    ifelse(final[i,46]==0,final[i,j]<-0,final[i,j]<-final[i,j]/sum(final[i,1:45])) 
     
   }
   
 }
+
+herfindal<- as.data.frame(apply(final[,1:45], 1, function(x) sum(x^2)))
 
 
 
@@ -69,8 +74,16 @@ som_model <- som(final,
                  dist.fcts = "euclidean"
 )
 
+
+
 plotHeatMap (som_model,DATI, variable=47)
 
+plotHeatMap (som_model,DATI2, variable=3)
+
+
+DATI2$GDP<-as.numeric(DATI2$GDP)
+DATI2$GDPpc<-as.numeric(DATI2$GDPpc)
+dev.off()
 plot(som_model, type="changes")
 
 #U_MATRIX 
@@ -273,3 +286,4 @@ for(i in c(0,14, 28, 32)){
   
   ggsave(paste("plot",i,".png",sep=""), p)
 }
+
