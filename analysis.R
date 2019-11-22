@@ -12,7 +12,7 @@ source("functionheatmap.R") #I took it from https://github.com/shanealynn/Kohone
 
 
 # IMPORT DATA
-DATI <- read.csv("FINAL_4.csv", sep = ";", dec = ",")
+DATI <- read.csv("FINAL3.csv", sep = ";", dec = ",")
 DATI2 <- read.csv("otherindicators.csv", sep = ",", dec = ".")
 
 DATI2$CO2pc<-as.numeric(DATI2$CO2pc)
@@ -22,27 +22,40 @@ rownames(DATI2) <- DATI2[,1]
 summary(DATI)
 #DATI[,154]<-as.numeric(DATI[,154])
 
-final<-as.matrix(DATI[,2:47])
+final<-as.matrix(DATI[,2:46])
+final[is.na(final)] <- 0
 
-
-sum(is.na(final))
+#sum(is.na(final))
 #final<-as.numeric(final)
 
-for (i in 1:123) {
-  for (j in 1:45) {
-    
-    ifelse(final[i,46]==0,final[i,j]<-0,final[i,j]<-final[i,j]/sum(final[i,1:45])) 
-    
-  }
-  
-}
-
-herfindal<- as.data.frame(apply(final[,1:45], 1, function(x) sum(x^2)))
-
+#herfindhal calculation NOT USED
+# sumfinal <- apply(final,1, function(x) sum(x))
+# 
+# for (i in 1:123) {
+#   for (j in 1:45) {
+#     
+#     ifelse(sum(final[i,])==0,final[i,j]<-0,final[i,j]<-final[i,j]/sumfinal[i] )
+#     
+#   }
+#   
+# }
+# 
+# finalsquared<- final^2
+# 
+# herfindal <-as.data.frame(nrow(123))
+# 
+# for (i in 1:123) {
+#   
+#     
+#    herfindal[i,1]<- sum(finalsquared[i,])
+#   
+#   
+# }
+# 
+# herfindal<- as.data.frame(apply(final[,1:45], 1, function(x) sum(x)))
 
 
 final<-scale(final)
-final<-final[,1:45]
 
 
 
@@ -64,7 +77,7 @@ coolBlueHotRed <- function(n, alpha = 1) {rainbow(n, end=4/6, alpha=alpha)[n:1]}
 
 #137 regioni 68 settori nodes= 5*sqr (rows)= 5*sqr(137)=5*11,7=58
 
-set.seed(12)
+set.seed(7)
 som_model <- som(final, 
                  somgrid(3,3,topo="hexagonal"), 
                  rlen=1000, 
@@ -77,8 +90,9 @@ som_model <- som(final,
 
 
 plotHeatMap (som_model,DATI, variable=47)
-
-plotHeatMap (som_model,DATI2, variable=3)
+DATI2$GDP<-as.numeric(DATI2$GDP)
+DATI2$GDPpc<-as.numeric(DATI2$GDPpc)
+plotHeatMap (som_model,DATI2, variable=6)
 
 
 DATI2$GDP<-as.numeric(DATI2$GDP)
