@@ -25,6 +25,10 @@ summary(DATI)
 final<-as.matrix(DATI[,2:46])
 final[is.na(final)] <- 0
 
+
+final2<-as.matrix(dati3)
+
+
 #sum(is.na(final))
 #final<-as.numeric(final)
 
@@ -56,7 +60,7 @@ final[is.na(final)] <- 0
 
 
 final<-scale(final)
-
+final2<-scale(final2)
 
 
 # Create the SOM Grid - you generally have to specify the size of the 
@@ -78,7 +82,7 @@ coolBlueHotRed <- function(n, alpha = 1) {rainbow(n, end=4/6, alpha=alpha)[n:1]}
 #137 regioni 68 settori nodes= 5*sqr (rows)= 5*sqr(137)=5*11,7=58
 
 set.seed(7)
-som_model <- som(final, 
+som_model2 <- som(final2, 
                  somgrid(3,3,topo="hexagonal"), 
                  rlen=1000, 
                  alpha=c(0.05,0.01), 
@@ -89,11 +93,13 @@ som_model <- som(final,
 
 
 
-plotHeatMap (som_model,DATI, variable=47)
+
+plotHeatMap(som_model,DATI, variable=15)
 DATI2$GDP<-as.numeric(DATI2$GDP)
 DATI2$GDPpc<-as.numeric(DATI2$GDPpc)
-plotHeatMap (som_model,DATI2, variable=6)
-
+DATI2$patentcapita<- DATI[,47]/DATI2[,5]
+plotHeatMap (som_model,DATI2, variable=7)
+colnames(DATI2$patentcapita)
 
 DATI2$GDP<-as.numeric(DATI2$GDP)
 DATI2$GDPpc<-as.numeric(DATI2$GDPpc)
@@ -119,7 +125,7 @@ plot(som_model, type="dist.neighbours", main = "", shape = "straight", palette.n
 
 
 plot(som_model, type="counts", main="", shape = "straight", palette.name = coolBlueHotRed)     
-plot(som_model, type="codes", main = "Weigh Vector 2013-16", shape = "straight", palette.name=coolBlueHotRed)
+plot(som_model, type="codes", main = "", shape = "straight", palette.name=coolBlueHotRed)
 dev.off()  
 #mypal<- wes_palette(9, name = "Zissou1", type = "continuous")
 
@@ -141,9 +147,9 @@ plot(som_model, type="mapping",
 
 library (dummies)
 
-for (i in 2:45) {
-  png(paste("rplot_", i,"BIS.png", sep="")) 
-  plotHeatMap(som_model,final, variable=i)
+for (i in 1:45) {
+  png(paste("rplot_", i,"final2.png", sep="")) 
+  plotHeatMap(som_model,dati3, variable=i)
   dev.off()
   print(i)
 }
@@ -168,16 +174,17 @@ e<-vector()
 
 
 iterations = 9
-variables = 4
+variables = 6
 
 output <- matrix(ncol=variables, nrow=iterations)
 
 for (i in 1:iterations){
   output[i,1] <- colnames(sort(codes[i,], decreasing = TRUE)[1])
   output[i,2]  <- colnames(sort(codes[i,], decreasing = TRUE)[2])
-  output[i,3] <- colnames(sort(codes[i,], decreasing = FALSE)[1])
-  output[i,4]  <- colnames(sort(codes[i,], decreasing = FALSE)[2])
-  
+  output[i,3]  <- colnames(sort(codes[i,], decreasing = TRUE)[3])
+  output[i,4] <- colnames(sort(codes[i,], decreasing = FALSE)[1])
+  output[i,5]  <- colnames(sort(codes[i,], decreasing = FALSE)[2])
+  output[i,6]  <- colnames(sort(codes[i,], decreasing = FALSE)[3])
 }
 
 #colnames(sort(codes[2,], decreasing = TRUE)[2])
@@ -281,23 +288,73 @@ ggsave(paste("1990.png",sep=""), p)
 E <- B[which(B$year%in% c("1990", "2015")),]
 F <- B[which(B$year%in% c("1990")),]
 G <- B[which(B$year%in% c("2015")),]
-for(i in c(0,14, 28, 32)){
+for(i in c(0,14, 28, 32, 46, 60,74)){
   
   
   C<-E[(i+1):(i+14),]
   
-  p <- ggplot(C, aes(X1, Y1)) + geom_point(aes(colour = factor(contry1),  shape = factor(year)))
+  p <- ggplot(C, aes(X1, Y1)) + geom_point(aes(colour = factor(contry1)))
   p <- p  + geom_path(aes(x = X1, y = Y1, group = factor(contry1), colour = factor(contry1)), 
                       arrow = arrow(length = unit(0.55, "cm")))
   
   p <- p + theme(legend.title = element_blank())
   p <- p + labs(x = "Dimension 1") + labs(y = "Dimension 2")
-  p <- p + geom_hline(yintercept=1.35, linetype="dashed", color = "black")
-  p <- p + geom_hline(yintercept=2.15, linetype="dashed", color = "black")
-  p <- p + geom_vline(xintercept=1.80, linetype="dashed", color = "black")
-  p <- p + geom_vline(xintercept=2.85, linetype="dashed", color = "black")
-  p
-  
+  p <- p + geom_hline(yintercept=1.2, linetype="dashed", color = "black")
+  p <- p + geom_hline(yintercept=2.8, linetype="dashed", color = "black")
+  p <- p + geom_vline(xintercept=1.2, linetype="dashed", color = "black")
+  p <- p + geom_vline(xintercept=2.8, linetype="dashed", color = "black")
+  p <- p + xlim(0,4)
+  p <- p + ylim(0,4)
   ggsave(paste("plot",i,".png",sep=""), p)
 }
+
+###############
+library(fmsb)
+
+# Create data: note in High school for Jonathan:
+data <- as.data.frame(matrix( sample( 2:20 , 10 , replace=T) , ncol=10))
+colnames(data) <- c("math" , "english" , "biology" , "music" , "R-coding", "data-viz" , "french" , "physic", "statistic", "sport" )
+
+# To use the fmsb package, I have to add 2 lines to the dataframe: the max and min of each topic to show on the plot!
+data <- rbind(rep(20,10) , rep(0,10) , data)
+
+# Check your data, it has to look like this!
+# head(data)
+codes1<-as.data.frame(as.matrix(codes))
+# Custom the radarChart !
+radarchart(codes1[7:9,], axistype=1 , 
+            
+            #custom polygon
+            pcol=rgb(0.2,0.5,0.5,0.9) , pfcol=rgb(0.2,0.5,0.5,0.5) , plwd=4 , 
+            
+            #custom the grid
+            cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
+            
+            #custom labels
+            vlcex=0.8 
+)
+
+
+sum(codes)
+sum(codes[,2])
+
+mean(codes[,2])
+
+codessmart<-apply(codes, 1, function(x) (codes-mean(x))^2)
+
+dati4<-DATI[,2:46]
+
+dati4[is.na(dati4)] <- 0
+
+for (i in 1: dim(dati4)[1]){
+  for (j in 1: dim(dati4)[2]){
+    
+    dati3[i,j]<- (dati4[i,j]/sum(dati4[,j]))/(sum(dati4[i,])/(sum(dati4)))
+    
+  print(j) 
+  }
+  print(i)
+}
+  
+
 
